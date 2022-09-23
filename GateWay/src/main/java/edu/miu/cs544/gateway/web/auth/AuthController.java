@@ -57,6 +57,7 @@ public class AuthController {
     @PostMapping(value = "/sign-up")
     public ResponseEntity<UserDto> signUp(@Valid @RequestBody SignUpRequest request) {
         LocalUser user = users.createUser(request);
+        log.debug("user created");
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDto(user));
     }
 }
