@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionDto implements Serializable {
-    private TransactionType type;
+    private TransactionType transactionType;
     private UUID clientId;
     private BigDecimal amount;
 }

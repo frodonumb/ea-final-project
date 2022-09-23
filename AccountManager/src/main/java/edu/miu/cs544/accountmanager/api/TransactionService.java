@@ -32,6 +32,7 @@ public class TransactionService implements Transactions {
     private final BalanceRepo balanceRepo;
 
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
+    @RabbitListener(queues = {"CLIENT_TRANSACTION"})
     @Override
     public Transaction makeTransaction(TransactionDto dto) throws NotEnoughBalanceException {
         Transaction transaction = transactionMapper.fromDto(dto);

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/transaction")
 public class TransactionController {
-    private TransactionService transactionService;
+    private final TransactionService transactionService;
 
     @PostMapping
     public void makeTransaction(@RequestBody TransactionDto transactionDto){

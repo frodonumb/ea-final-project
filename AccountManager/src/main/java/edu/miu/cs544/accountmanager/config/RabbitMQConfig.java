@@ -38,6 +38,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    Queue transactionQueue() {
+        return new Queue("CLIENT_TRANSACTION", true);
+    }
+
+    @Bean
     Exchange myExchange() {
         return ExchangeBuilder.directExchange(exchange).durable(true).build();
     }
@@ -48,6 +53,15 @@ public class RabbitMQConfig {
                 .bind(queue())
                 .to(myExchange())
                 .with(routingKey)
+                .noargs();
+    }
+
+    @Bean
+    Binding trxBinding() {
+        return BindingBuilder
+                .bind(transactionQueue())
+                .to(myExchange())
+                .with("CLIENT_TRANSACTION")
                 .noargs();
     }
 
@@ -65,7 +79,7 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory factory){
+    public RabbitTemplate rabbitTemplate(ConnectionFactory factory) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(factory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
         return rabbitTemplate;
