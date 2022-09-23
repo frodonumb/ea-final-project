@@ -1,13 +1,11 @@
 package edu.miu.cs544.clientmanager.controller;
 
-import edu.miu.cs544.dto.ClientDto;
-import edu.miu.cs544.service.ClientService;
+import edu.miu.cs544.clientmanager.dto.ClientDto;
+import edu.miu.cs544.clientmanager.service.ClientService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.UUID;
 

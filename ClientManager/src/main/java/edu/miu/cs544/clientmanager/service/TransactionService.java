@@ -1,9 +1,7 @@
 package edu.miu.cs544.clientmanager.service;
 
-import edu.miu.cs544.dto.TransactionDto;
-import edu.miu.cs544.entity.Transaction;
 
-import java.util.UUID;
+import edu.miu.cs544.clientmanager.dto.TransactionDto;
 
 public interface TransactionService {
     void makeTransaction(TransactionDto transactionDto);

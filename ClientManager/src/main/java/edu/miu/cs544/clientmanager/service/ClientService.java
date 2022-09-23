@@ -1,7 +1,7 @@
 package edu.miu.cs544.clientmanager.service;
 
-import edu.miu.cs544.dto.ClientDto;
-import edu.miu.cs544.entity.Client;
+
+import edu.miu.cs544.clientmanager.dto.ClientDto;
 
 import java.util.List;
 import java.util.UUID;

@@ -1,15 +1,12 @@
 package edu.miu.cs544.clientmanager.service.impl;
 
-import edu.miu.cs544.dto.ClientDto;
-import edu.miu.cs544.dto.TransactionDto;
-import edu.miu.cs544.entity.Client;
-import edu.miu.cs544.entity.Transaction;
-import edu.miu.cs544.entity.enums.TransactionStatus;
-import edu.miu.cs544.entity.enums.TransactionType;
-import edu.miu.cs544.repository.ClientRepository;
-import edu.miu.cs544.repository.TransactionRepository;
-import edu.miu.cs544.service.ClientService;
-import edu.miu.cs544.service.TransactionService;
+import edu.miu.cs544.clientmanager.dto.TransactionDto;
+import edu.miu.cs544.clientmanager.entity.Client;
+import edu.miu.cs544.clientmanager.entity.Transaction;
+import edu.miu.cs544.clientmanager.entity.enums.TransactionStatus;
+import edu.miu.cs544.clientmanager.repository.ClientRepository;
+import edu.miu.cs544.clientmanager.repository.TransactionRepository;
+import edu.miu.cs544.clientmanager.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 import java.util.Date;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

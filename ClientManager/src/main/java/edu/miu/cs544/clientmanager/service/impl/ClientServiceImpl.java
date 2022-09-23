@@ -1,10 +1,11 @@
 package edu.miu.cs544.clientmanager.service.impl;
 
-import edu.miu.cs544.dto.ClientDto;
-import edu.miu.cs544.entity.Address;
-import edu.miu.cs544.entity.Client;
-import edu.miu.cs544.repository.ClientRepository;
-import edu.miu.cs544.service.ClientService;
+
+import edu.miu.cs544.clientmanager.dto.ClientDto;
+import edu.miu.cs544.clientmanager.entity.Address;
+import edu.miu.cs544.clientmanager.entity.Client;
+import edu.miu.cs544.clientmanager.repository.ClientRepository;
+import edu.miu.cs544.clientmanager.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
