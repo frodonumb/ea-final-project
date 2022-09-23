@@ -1,0 +1,39 @@
+debug: true
+
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cs544
+    username: postgres
+    password: postgres
+
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      minimumIdle: 1
+      maximumPoolSize: 3
+      idleTimeout: 60000
+      maxLifetime: 180000
+      leakDetectionThreshold: 25000
+      connectionTimeout: 2000
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      jdbc:
+        lob:
+          non_contextual_creation: true
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: true
+
+security:
+  jwt:
+    secret:
+      4vzfsjym7t9lu
+
+logging:
+  level:
+    org.springframework.security: debug
