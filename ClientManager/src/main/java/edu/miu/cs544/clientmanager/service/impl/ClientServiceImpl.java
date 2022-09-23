@@ -7,7 +7,11 @@ import edu.miu.cs544.clientmanager.entity.Client;
 import edu.miu.cs544.clientmanager.repository.ClientRepository;
 import edu.miu.cs544.clientmanager.service.ClientService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -20,11 +24,13 @@ public class ClientServiceImpl implements ClientService {
     private ClientRepository clientRepository;
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
     public List<ClientDto> getAll() {
         return clientRepository.findAll().stream().map(this::toDto).toList();
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
     public ClientDto get(UUID id) {
         Optional<Client> optionalClient = clientRepository.findById(id);
         if (optionalClient.isPresent()) {
@@ -34,11 +40,14 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
+    @RabbitListener(queues = {"CLIENT_CREATED"})
     public ClientDto create(ClientDto clientDto) {
         return toDto(clientRepository.save(fromDto(clientDto)));
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
     public ClientDto update(UUID id, ClientDto clientDto) {
         Optional<Client> optionalClient = clientRepository.findById(id);
         if (optionalClient.isPresent()) {
@@ -48,6 +57,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
     public void delete(UUID id) {
         clientRepository.deleteById(id);
     }
@@ -66,8 +76,15 @@ public class ClientServiceImpl implements ClientService {
 
     private Client fromDto(ClientDto clientDto) {
         return new Client(
-                clientDto.getUserId(), clientDto.getFirstname(), clientDto.getLastname(), clientDto.getEmail(),
-                new Address(clientDto.getStreet(), clientDto.getCity(), clientDto.getState(), clientDto.getZip())
+                clientDto.getUserId(),
+                clientDto.getFirstname(),
+                clientDto.getLastname(),
+                clientDto.getEmail(),
+                new Address(
+                        clientDto.getStreet(),
+                        clientDto.getCity(),
+                        clientDto.getState(),
+                        clientDto.getZip())
         );
     }
 }
