@@ -2,9 +2,13 @@ package edu.miu.cs544.accountmanager.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.Declarables;
+import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.ExchangeBuilder;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -14,8 +18,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Map;
+
 @Configuration
 public class RabbitMQConfig {
+
+    public static final String CLIENT_CREATED_QUEUE = "CLIENT_CREATED";
+    public static final String CLIENT_TRANSACTION_QUEUE = "CLIENT_TRANSACTION";
+
+    public static final String DLX_QUEUE_MESSAGES = "QUEUE_MESSAGES_DLQ";
+    public static final String DLX_EXCHANGE = "DLX_EXCHANGE_MESSAGES" + ".dlx";
+    public static final String DLX_ROUTE = "DLX_ROUTE";
 
     @Value("${spring.rabbitmq.template.exchange}")
     private String exchange;
@@ -33,36 +46,34 @@ public class RabbitMQConfig {
     private String host;
 
     @Bean
-    Queue queue() {
-        return new Queue("CLIENT_CREATED", true);
-    }
+    public Declarables dlxAndDlqConfig() {
+        DirectExchange clientExchange = new DirectExchange(exchange, true, false);
 
-    @Bean
-    Queue transactionQueue() {
-        return new Queue("CLIENT_TRANSACTION", true);
-    }
+        Queue clientCreatedQueue = new Queue(CLIENT_CREATED_QUEUE, true, false, false,
+                Map.of(
+                        "x-dead-letter-exchange", DLX_EXCHANGE,
+                        "x-dead-letter-routing-key", DLX_ROUTE
+                ));
 
-    @Bean
-    Exchange myExchange() {
-        return ExchangeBuilder.directExchange(exchange).durable(true).build();
-    }
+        Queue clientTransactionQueue = new Queue(CLIENT_TRANSACTION_QUEUE, true, false, false,
+                Map.of(
+                        "x-dead-letter-exchange", DLX_EXCHANGE,
+                        "x-dead-letter-routing-key", DLX_ROUTE
+                ));
 
-    @Bean
-    Binding binding() {
-        return BindingBuilder
-                .bind(queue())
-                .to(myExchange())
-                .with(routingKey)
-                .noargs();
-    }
+        Queue deadLetterQueue = new Queue(DLX_QUEUE_MESSAGES, true);
+        DirectExchange deadLetterExchange = new DirectExchange(DLX_EXCHANGE, true, false);
 
-    @Bean
-    Binding trxBinding() {
-        return BindingBuilder
-                .bind(transactionQueue())
-                .to(myExchange())
-                .with("CLIENT_TRANSACTION")
-                .noargs();
+        return new Declarables(
+                clientExchange,
+                clientCreatedQueue,
+                BindingBuilder.bind(clientCreatedQueue).to(clientExchange).with(CLIENT_CREATED_QUEUE),
+                clientTransactionQueue,
+                BindingBuilder.bind(clientTransactionQueue).to(clientExchange).with(CLIENT_TRANSACTION_QUEUE),
+                deadLetterExchange,
+                deadLetterQueue,
+                BindingBuilder.bind(deadLetterQueue).to(deadLetterExchange).with(DLX_ROUTE)
+        );
     }
 
     @Bean

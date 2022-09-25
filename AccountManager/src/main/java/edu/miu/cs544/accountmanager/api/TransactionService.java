@@ -11,6 +11,7 @@ import edu.miu.cs544.accountmanager.exceptions.NotEnoughBalanceException;
 import edu.miu.cs544.accountmanager.mapper.TransactionMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -25,14 +26,13 @@ import java.util.UUID;
 @Slf4j
 @Service
 @AllArgsConstructor
+@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
 public class TransactionService implements Transactions {
 
     private final TransactionMapper transactionMapper;
     private final TransactionRepo transactionRepo;
     private final BalanceRepo balanceRepo;
 
-    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
-    @RabbitListener(queues = {"CLIENT_TRANSACTION"})
     @Override
     public Transaction makeTransaction(TransactionDto dto) throws NotEnoughBalanceException {
         Transaction transaction = transactionMapper.fromDto(dto);
@@ -40,6 +40,15 @@ public class TransactionService implements Transactions {
         Balance balance = makeOperationOnBalance(transaction, getBalanceByClient(transaction.getClientId()));
         balanceRepo.saveAndFlush(balance);
         return transaction;
+    }
+
+    @RabbitListener(queues = {"CLIENT_TRANSACTION"})
+    public void listenOnMakeTransaction(TransactionDto dto) {
+        try {
+            makeTransaction(dto);
+        } catch (Exception ex) {
+            throw new AmqpRejectAndDontRequeueException("Ops, an error! Message should go to DLX and DLQ");
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
