@@ -29,7 +29,7 @@ public class UserService implements Users {
         localUser.setUsername(request.getUsername());
         localUser.setPassword(passwordEncoder.encode(request.getPassword()));
         localUser.setRole(Role.CLIENT);
-        localUser = repo.save(localUser);
+        localUser = repo.saveAndFlush(localUser);
         rabbitTemplate.convertAndSend("CLIENT_CREATED", mapper.toDto(localUser));
         log.info("mq was sent with routing key CLIENT_CREATED");
         return localUser;
