@@ -45,3 +45,7 @@ security:
 logging:
   level:
     org.springframework.security: debug
+
+service-urls:
+  account-manager-url: http://localhost:8082/api/
+  clientManagerUrl: http://localhost:8083/api/v1/
