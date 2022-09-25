@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/transaction")
+@RequestMapping("/api/v1/transactions")
 public class TransactionController {
     private final TransactionService transactionService;
 
