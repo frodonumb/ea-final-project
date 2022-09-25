@@ -13,9 +13,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/clients")
 public class ClientController {
-    private ClientService clientService;
+    private final ClientService clientService;
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<ClientDto>> getAll() {
         return ResponseEntity.ok().body(clientService.getAll());
     }
@@ -25,7 +25,7 @@ public class ClientController {
         return ResponseEntity.ok().body(clientService.get(id));
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<ClientDto> create(@RequestBody ClientDto clientDto) {
         return ResponseEntity.ok().body(clientService.create(clientDto));
     }

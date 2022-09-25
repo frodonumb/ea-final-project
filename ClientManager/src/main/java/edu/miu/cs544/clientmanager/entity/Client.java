@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Client {
     @Id
-    private UUID userId;
+    private UUID id;
     private String firstname;
     private String lastname;
     private String email;

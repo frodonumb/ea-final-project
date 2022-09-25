@@ -1,6 +1,7 @@
 package edu.miu.cs544.clientmanager.service.impl;
 
 
+import edu.miu.cs544.clientmanager.configuration.RabbitMQConfiguration;
 import edu.miu.cs544.clientmanager.dto.ClientDto;
 import edu.miu.cs544.clientmanager.entity.Address;
 import edu.miu.cs544.clientmanager.entity.Client;
@@ -21,7 +22,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ClientServiceImpl implements ClientService {
-    private ClientRepository clientRepository;
+    private final ClientRepository clientRepository;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
@@ -41,8 +42,9 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
-    @RabbitListener(queues = {"CLIENT_CREATED"})
+    @RabbitListener(queues = RabbitMQConfiguration.QUEUE)
     public ClientDto create(ClientDto clientDto) {
+        System.out.println(clientDto.toString());
         return toDto(clientRepository.save(fromDto(clientDto)));
     }
 
@@ -64,7 +66,7 @@ public class ClientServiceImpl implements ClientService {
 
     private ClientDto toDto(Client client) {
         return new ClientDto(
-                client.getUserId(),
+                client.getId(),
                 client.getFirstname(),
                 client.getLastname(),
                 client.getEmail(),
@@ -76,7 +78,7 @@ public class ClientServiceImpl implements ClientService {
 
     private Client fromDto(ClientDto clientDto) {
         return new Client(
-                clientDto.getUserId(),
+                clientDto.getId(),
                 clientDto.getFirstname(),
                 clientDto.getLastname(),
                 clientDto.getEmail(),

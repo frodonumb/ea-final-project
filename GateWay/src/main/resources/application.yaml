@@ -5,9 +5,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/cs544
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://localhost:5432/practice
+    username: bekmax
+    password:
 
     driver-class-name: org.postgresql.Driver
     hikari:

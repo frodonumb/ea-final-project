@@ -8,6 +8,7 @@ import edu.miu.cs544.clientmanager.repository.ClientRepository;
 import edu.miu.cs544.clientmanager.repository.TransactionRepository;
 import edu.miu.cs544.clientmanager.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final ClientRepository clientRepository;
@@ -30,6 +32,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
     public void makeTransaction(TransactionDto transactionDto) {
+        log.info(transactionDto.toString());
         Transaction transaction = createTransactionObject(transactionDto);
         transactionRepository.save(transaction);
         rabbitTemplate.convertAndSend("CLIENT_TRANSACTION", transactionDto);

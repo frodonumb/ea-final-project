@@ -16,6 +16,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class Transaction {
     @Id
+    @GeneratedValue
     private Long id;
     @Enumerated(value = EnumType.STRING)
     private TransactionType type;

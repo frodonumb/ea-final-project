@@ -14,38 +14,41 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfiguration {
-    @Value("guest")
-    private String username;
-    @Value("guest")
-    private String password;
-    @Value("localhost")
-    private String host;
 
-    @Value("user.routingkey")
-    private String routingKey;
-    @Value("user.exchange")
-    private String exchange;
+    private final String HOST = "localhost";
+    private final String USERNAME = "guest";
+    private final String PASSWORD = "guest";
 
+    public static final String QUEUE = "CLIENT_CREATED";
+    private static final String EXCHANGE = "user.exchange";
+    private static final String ROUTING_KEY = "user.routingKey";
     @Bean
-    public Queue getQueue(){
-        return new Queue("CLIENT_CREATED", true);
+    public Queue getClientQueue(){
+        return new Queue(QUEUE, true);
     }
 
     @Bean
     public Exchange getExchange(){
-        return ExchangeBuilder.directExchange(exchange).durable(true).build();
+        return ExchangeBuilder
+                .directExchange(EXCHANGE)
+                .durable(true)
+                .build();
     }
 
     @Bean
     public Binding getBinding(){
-        return BindingBuilder.bind(getQueue()).to(getExchange()).with(routingKey).noargs();
+        return BindingBuilder
+                .bind(getClientQueue())
+                .to(getExchange())
+                .with(ROUTING_KEY)
+                .noargs();
     }
 
     @Bean
     public CachingConnectionFactory connectionFactory() {
-        CachingConnectionFactory factory = new CachingConnectionFactory(host);
-        factory.setUsername(username);
-        factory.setPassword(password);
+        CachingConnectionFactory factory = new CachingConnectionFactory(HOST);
+        factory.setUsername(USERNAME);
+        factory.setPassword(PASSWORD);
         return factory;
     }
     @Bean
