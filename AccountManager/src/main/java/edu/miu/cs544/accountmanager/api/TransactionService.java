@@ -11,8 +11,10 @@ import edu.miu.cs544.accountmanager.exceptions.NotEnoughBalanceException;
 import edu.miu.cs544.accountmanager.mapper.TransactionMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -33,11 +36,13 @@ public class TransactionService implements Transactions {
     private final TransactionRepo transactionRepo;
     private final BalanceRepo balanceRepo;
 
+    private final RabbitTemplate rabbitTemplate;
+
     @Override
     public Transaction makeTransaction(TransactionDto dto) throws NotEnoughBalanceException {
         Transaction transaction = transactionMapper.fromDto(dto);
         transaction = transactionRepo.saveAndFlush(transaction);
-        Balance balance = makeOperationOnBalance(transaction, getBalanceByClient(transaction.getClientId()));
+        Balance balance = makeOperationOnBalance(transaction, getBalanceByClient(transaction.getClientId(), true));
         balanceRepo.saveAndFlush(balance);
         return transaction;
     }
@@ -45,14 +50,16 @@ public class TransactionService implements Transactions {
     @RabbitListener(queues = {"CLIENT_TRANSACTION"})
     public void listenOnMakeTransaction(TransactionDto dto) {
         try {
-            makeTransaction(dto);
+            Transaction trx = makeTransaction(dto);
+            rabbitTemplate.convertAndSend("CLIENT_TRANSACTION_SUCCESS", transactionMapper.toDto(trx));
         } catch (Exception ex) {
-            throw new AmqpRejectAndDontRequeueException("Ops, an error! Message should go to DLX and DLQ");
+            log.error(ex.getMessage(), ex);
+            dto.setDescription(ex.getMessage());
+            rabbitTemplate.convertAndSend("CLIENT_TRANSACTION_FAILED", dto);
+            throw new AmqpRejectAndDontRequeueException("Ops, an error! Couldn't create a transaction");
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
-    @RabbitListener(queues = {"CLIENT_CREATED"})
     public void onClientCreated(UserDto client) {
         log.info("mq was received with queue name CLIENT_CREATED");
         Balance balance = new Balance();
@@ -62,12 +69,23 @@ public class TransactionService implements Transactions {
     }
 
     private boolean hasClientEnoughBalance(Transaction transaction) {
-        Balance balance = getBalanceByClient(transaction.getClientId());
+        Balance balance = getBalanceByClient(transaction.getClientId(), false);
         return balance.getBalance().subtract(transaction.getAmount()).compareTo(BigDecimal.ZERO) >= 0;
     }
 
-    private Balance getBalanceByClient(UUID clientId) {
-        return balanceRepo.findByClientId(clientId).orElseThrow(() -> new EntityNotFoundException("There is no balance for client with id: " + clientId));
+    private Balance getBalanceByClient(UUID clientId, boolean createBalanceIfNeeded) {
+        Optional<Balance> balanceOp = balanceRepo.findByClientId(clientId);
+
+        if (balanceOp.isPresent()) {
+            return balanceOp.get();
+        } else if (createBalanceIfNeeded) {
+            UserDto userDto = new UserDto();
+            userDto.setId(clientId);
+            onClientCreated(userDto);
+            return getBalanceByClient(clientId, false);
+        } else {
+            throw new EntityNotFoundException("There is no balance for client with id: " + clientId);
+        }
     }
 
     private Balance subtractBalance(Transaction transaction, Balance balance) throws NotEnoughBalanceException {

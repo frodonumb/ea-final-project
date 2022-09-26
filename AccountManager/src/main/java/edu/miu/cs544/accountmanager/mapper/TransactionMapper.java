@@ -8,4 +8,6 @@ import org.mapstruct.Mapper;
 public interface TransactionMapper {
 
     Transaction fromDto(TransactionDto dto);
+
+    TransactionDto toDto(Transaction transaction);
 }

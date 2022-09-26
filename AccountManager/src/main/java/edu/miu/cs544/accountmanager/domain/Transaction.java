@@ -30,6 +30,8 @@ public class Transaction extends AbstractEntity {
 
     private BigDecimal amount;
 
+    private Long trxID;
+
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType;
 

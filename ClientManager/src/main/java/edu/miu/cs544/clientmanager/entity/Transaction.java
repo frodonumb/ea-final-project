@@ -30,6 +30,8 @@ public class Transaction {
     private Date createdAt;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
+    @Lob
+    private String description;
 
     @ManyToOne
     @JoinColumn(name = "client_id")

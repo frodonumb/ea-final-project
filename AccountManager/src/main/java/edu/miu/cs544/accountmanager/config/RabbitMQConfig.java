@@ -49,12 +49,6 @@ public class RabbitMQConfig {
     public Declarables dlxAndDlqConfig() {
         DirectExchange clientExchange = new DirectExchange(exchange, true, false);
 
-        Queue clientCreatedQueue = new Queue(CLIENT_CREATED_QUEUE, true, false, false,
-                Map.of(
-                        "x-dead-letter-exchange", DLX_EXCHANGE,
-                        "x-dead-letter-routing-key", DLX_ROUTE
-                ));
-
         Queue clientTransactionQueue = new Queue(CLIENT_TRANSACTION_QUEUE, true, false, false,
                 Map.of(
                         "x-dead-letter-exchange", DLX_EXCHANGE,
@@ -66,8 +60,6 @@ public class RabbitMQConfig {
 
         return new Declarables(
                 clientExchange,
-                clientCreatedQueue,
-                BindingBuilder.bind(clientCreatedQueue).to(clientExchange).with(CLIENT_CREATED_QUEUE),
                 clientTransactionQueue,
                 BindingBuilder.bind(clientTransactionQueue).to(clientExchange).with(CLIENT_TRANSACTION_QUEUE),
                 deadLetterExchange,

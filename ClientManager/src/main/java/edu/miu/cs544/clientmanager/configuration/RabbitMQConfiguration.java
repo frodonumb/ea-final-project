@@ -1,6 +1,10 @@
 package edu.miu.cs544.clientmanager.configuration;
 
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.Declarables;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -49,13 +53,20 @@ public class RabbitMQConfiguration {
         Queue deadLetterQueue = new Queue(DLX_QUEUE_MESSAGES, true);
         DirectExchange deadLetterExchange = new DirectExchange(DLX_EXCHANGE, true, false);
 
+        Queue transactionSuccessQueue = QueueBuilder.durable("CLIENT_TRANSACTION_SUCCESS").build();
+        Queue transactionFailedQueue = QueueBuilder.durable("CLIENT_TRANSACTION_FAILED").build();
+
         return new Declarables(
                 clientExchange,
                 clientCreatedQueue,
                 BindingBuilder.bind(clientCreatedQueue).to(clientExchange).with(CLIENT_CREATED_QUEUE),
                 deadLetterExchange,
                 deadLetterQueue,
-                BindingBuilder.bind(deadLetterQueue).to(deadLetterExchange).with(DLX_ROUTE)
+                BindingBuilder.bind(deadLetterQueue).to(deadLetterExchange).with(DLX_ROUTE),
+                transactionSuccessQueue,
+                BindingBuilder.bind(transactionSuccessQueue).to(clientExchange).with("CLIENT_TRANSACTION_SUCCESS"),
+                transactionFailedQueue,
+                BindingBuilder.bind(transactionFailedQueue).to(clientExchange).with("CLIENT_TRANSACTION_FAILED")
         );
     }
 
