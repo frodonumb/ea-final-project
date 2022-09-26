@@ -1,6 +1,5 @@
 package edu.miu.cs544.gateway.dto.transaction;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +12,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionDto implements Serializable {
+
+    private Long trxID;
     private TransactionType transactionType;
     private UUID clientId;
     private BigDecimal amount;
+    private String description;
+    private String status;
+    private String createdAt;
+    private String updatedAt;
 }

@@ -11,7 +11,6 @@ import edu.miu.cs544.accountmanager.exceptions.NotEnoughBalanceException;
 import edu.miu.cs544.accountmanager.mapper.TransactionMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -50,6 +49,7 @@ public class TransactionService implements Transactions {
     @RabbitListener(queues = {"CLIENT_TRANSACTION"})
     public void listenOnMakeTransaction(TransactionDto dto) {
         try {
+            Thread.sleep(10000);
             Transaction trx = makeTransaction(dto);
             rabbitTemplate.convertAndSend("CLIENT_TRANSACTION_SUCCESS", transactionMapper.toDto(trx));
         } catch (Exception ex) {
@@ -90,7 +90,9 @@ public class TransactionService implements Transactions {
 
     private Balance subtractBalance(Transaction transaction, Balance balance) throws NotEnoughBalanceException {
         if (!hasClientEnoughBalance(transaction)) {
-            throw new NotEnoughBalanceException();
+            throw new NotEnoughBalanceException(String.format("Not enough balance, withdraw amount: %s, balance: %s",
+                    transaction.getAmount().doubleValue(),
+                    balance.getBalance().doubleValue()));
         }
         balance.setBalance(balance.getBalance().subtract(transaction.getAmount()));
         return balance;

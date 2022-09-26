@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -32,7 +34,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final RabbitTemplate rabbitTemplate;
 
     @Override
-    public void makeTransaction(TransactionDto transactionDto) {
+    public Transaction makeTransaction(TransactionDto transactionDto) {
         log.info(transactionDto.toString());
         Transaction transaction = createTransactionObject(transactionDto);
         transaction = transactionRepository.saveAndFlush(transaction);
@@ -40,6 +42,13 @@ public class TransactionServiceImpl implements TransactionService {
         rabbitTemplate.convertAndSend("CLIENT_TRANSACTION", transactionDto);
         transaction.setStatus(TransactionStatus.PROCESSING);
         transactionRepository.save(transaction);
+
+        return transaction;
+    }
+
+    @Override
+    public List<Transaction> getTransactionsByClient(UUID clientId) {
+        return transactionRepository.findAllByClientId(clientId);
     }
 
     @RabbitListener(queues = {"CLIENT_TRANSACTION_SUCCESS"})
@@ -47,6 +56,7 @@ public class TransactionServiceImpl implements TransactionService {
         try {
             Transaction transaction = getById(transactionDto.getTrxID());
             transaction.setStatus(TransactionStatus.COMPLETED);
+            transaction.setUpdatedAt(new Date());
             transactionRepository.save(transaction);
         } catch (Exception ex) {
             log.error(ex.getMessage());
@@ -58,7 +68,8 @@ public class TransactionServiceImpl implements TransactionService {
         try {
             Transaction transaction = getById(transactionDto.getTrxID());
             transaction.setStatus(TransactionStatus.FAILED);
-            transaction.setDescription(transaction.getDescription());
+            transaction.setDescription(transactionDto.getDescription());
+            transaction.setUpdatedAt(new Date());
             transactionRepository.save(transaction);
         } catch (Exception ex) {
             log.error(ex.getMessage());

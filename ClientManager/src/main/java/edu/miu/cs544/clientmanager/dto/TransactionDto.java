@@ -1,6 +1,6 @@
 package edu.miu.cs544.clientmanager.dto;
 
-
+import edu.miu.cs544.clientmanager.entity.enums.TransactionStatus;
 import edu.miu.cs544.clientmanager.entity.enums.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,4 +20,7 @@ public class TransactionDto implements Serializable {
     private UUID clientId;
     private BigDecimal amount;
     private String description;
+    private TransactionStatus status;
+    private String createdAt;
+    private String updatedAt;
 }
