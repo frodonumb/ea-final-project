@@ -56,6 +56,7 @@ public class ClientServiceImpl implements ClientService {
     public ClientDto update(UUID id, ClientDto clientDto) {
         Optional<Client> optionalClient = clientRepository.findById(id);
         if (optionalClient.isPresent()) {
+            clientDto.setId(id);
             return toDto(clientRepository.save(fromDto(clientDto)));
         }
         throw new EntityNotFoundException("Client with id: " + id + " does not exist");

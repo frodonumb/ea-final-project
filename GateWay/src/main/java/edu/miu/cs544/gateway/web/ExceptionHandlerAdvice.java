@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.persistence.EntityNotFoundException;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -36,6 +37,17 @@ public class ExceptionHandlerAdvice {
     @ExceptionHandler(AccessDeniedException.class)
     public ErrorDto handleAuthException(AccessDeniedException ex) {
         log.error("Access denied exception: ", ex);
+        if (!ObjectUtils.isEmpty(ex.getCause()) || !ObjectUtils.isEmpty(ex.getCause().getMessage())) {
+            return error(ex.getMessage(), new String[]{ex.getCause().getMessage()});
+        } else {
+            return error(ex.getMessage(), new Serializable[0]);
+        }
+    }
+
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ErrorDto handleAuthException(EntityNotFoundException ex) {
+        log.error("Entity not found exception: ", ex);
         if (!ObjectUtils.isEmpty(ex.getCause()) || !ObjectUtils.isEmpty(ex.getCause().getMessage())) {
             return error(ex.getMessage(), new String[]{ex.getCause().getMessage()});
         } else {
