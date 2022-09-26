@@ -15,7 +15,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @ToString
 public class TransactionDto implements Serializable {
+    private Long trxID;
     private TransactionType transactionType;
     private UUID clientId;
     private BigDecimal amount;
+    private String description;
 }

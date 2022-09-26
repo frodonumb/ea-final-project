@@ -1,6 +1,5 @@
 package edu.miu.cs544.clientmanager.service.impl;
 
-
 import edu.miu.cs544.clientmanager.configuration.RabbitMQConfiguration;
 import edu.miu.cs544.clientmanager.dto.ClientDto;
 import edu.miu.cs544.clientmanager.entity.Address;
@@ -8,6 +7,7 @@ import edu.miu.cs544.clientmanager.entity.Client;
 import edu.miu.cs544.clientmanager.repository.ClientRepository;
 import edu.miu.cs544.clientmanager.service.ClientService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -15,13 +15,16 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ClientServiceImpl implements ClientService {
+
     private final ClientRepository clientRepository;
 
     @Override
@@ -46,8 +49,10 @@ public class ClientServiceImpl implements ClientService {
         System.out.println(clientDto.toString());
         return toDto(clientRepository.save(fromDto(clientDto)));
     }
+
     @RabbitListener(queues = RabbitMQConfiguration.CLIENT_CREATED_QUEUE)
-    public void onListenCreate(ClientDto clientDto){
+    public void onListenCreate(ClientDto clientDto) {
+        log.info("mq was received with queue name CLIENT_CREATED");
         create(clientDto);
     }
 

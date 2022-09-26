@@ -10,7 +10,9 @@ import java.util.UUID;
 @Data
 public class TransactionDto implements Serializable {
 
+    private Long trxID;
     private TransactionType transactionType;
     private UUID clientId;
     private BigDecimal amount;
+    private String description;
 }
