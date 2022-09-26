@@ -1,6 +1,7 @@
 package edu.miu.cs544.clientmanager.configuration;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Map;
 
 @Configuration
+@EnableRabbit
 public class RabbitMQConfiguration {
 
     public static final String CLIENT_CREATED_QUEUE = "CLIENT_CREATED";

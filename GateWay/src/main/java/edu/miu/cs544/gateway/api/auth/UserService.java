@@ -3,6 +3,8 @@ package edu.miu.cs544.gateway.api.auth;
 import edu.miu.cs544.gateway.dao.auth.UserRepo;
 import edu.miu.cs544.gateway.domain.auth.LocalUser;
 import edu.miu.cs544.gateway.domain.auth.Role;
+import edu.miu.cs544.gateway.dto.auth.ClientDto;
+import edu.miu.cs544.gateway.mapper.ClientMapper;
 import edu.miu.cs544.gateway.mapper.LocalUserMapper;
 import edu.miu.cs544.gateway.rest.request.SignUpRequest;
 import lombok.AllArgsConstructor;
@@ -20,6 +22,8 @@ public class UserService implements Users {
 
     private final UserRepo repo;
     private final LocalUserMapper mapper;
+
+    private final ClientMapper clientMapper;
     private final PasswordEncoder passwordEncoder;
     private final RabbitTemplate rabbitTemplate;
 
@@ -30,8 +34,12 @@ public class UserService implements Users {
         localUser.setPassword(passwordEncoder.encode(request.getPassword()));
         localUser.setRole(Role.CLIENT);
         localUser = repo.saveAndFlush(localUser);
-        rabbitTemplate.convertAndSend("CLIENT_CREATED", mapper.toDto(localUser));
-        log.info("mq was sent with routing key CLIENT_CREATED");
+        ClientDto clientDto = clientMapper.toClientDto(request);
+        clientDto.setId(localUser.getId());
+        rabbitTemplate.convertAndSend("CLIENT_CREATED", clientDto);
+        log.info("MQ was sent with routing key CLIENT_CREATED");
         return localUser;
     }
+
+
 }

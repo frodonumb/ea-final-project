@@ -42,10 +42,13 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
-    @RabbitListener(queues = RabbitMQConfiguration.QUEUE)
     public ClientDto create(ClientDto clientDto) {
         System.out.println(clientDto.toString());
         return toDto(clientRepository.save(fromDto(clientDto)));
+    }
+    @RabbitListener(queues = RabbitMQConfiguration.CLIENT_CREATED_QUEUE)
+    public void onListenCreate(ClientDto clientDto){
+        create(clientDto);
     }
 
     @Override

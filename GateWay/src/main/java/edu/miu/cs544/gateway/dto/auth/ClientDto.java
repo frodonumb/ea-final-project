@@ -1,26 +1,25 @@
-package edu.miu.cs544.clientmanager.entity;
+package edu.miu.cs544.gateway.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import java.io.Serializable;
 import java.util.UUID;
 
-@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class Client {
-    @Id
+public class ClientDto implements Serializable {
     private UUID id;
     private String firstname;
     private String lastname;
     private String email;
-    @Embedded
-    private Address address;
+
+    private String street;
+    private String city;
+    private String state;
+    private String zip;
 }

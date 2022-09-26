@@ -9,4 +9,6 @@ public interface LocalUserMapper {
 
     UserDto toDto(LocalUser user);
 
+
+
 }
