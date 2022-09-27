@@ -52,7 +52,7 @@ public class ClientServiceImpl implements ClientService {
 
     @RabbitListener(queues = RabbitMQConfiguration.CLIENT_CREATED_QUEUE)
     public void onListenCreate(ClientDto clientDto) {
-        log.info("mq was received with queue name CLIENT_CREATED");
+        log.info("MQ was received with queue name CLIENT_CREATED_QUEUE");
         create(clientDto);
     }
 
